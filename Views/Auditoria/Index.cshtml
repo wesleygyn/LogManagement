@@ -1,0 +1,319 @@
+﻿@model cloudscribe.Pagination.Models.PagedResult<Audit>
+@inject IHttpContextAccessor httpAcc
+
+@{
+    var listPermissionUser = httpAcc.HttpContext.Request.Cookies["Permission"].Split(", ");
+    ViewData["Title"] = "Auditoria";
+    ViewData["Controller"] = "Auditoria";
+    ViewData["Action"] = "Index";
+}
+
+@if (TempData["alertDelete"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["alertDelete"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<link href="~/css/auditoria.css" rel="stylesheet" />
+
+<div class="text-left">
+
+    <label id="filtros" class="toggle">
+        <input class="toggle-checkbox" type="checkbox" onclick="exibirFiltro('filtroLog', this)" checked="checked">
+        <div class="toggle-switch"></div>
+        <span class="toggle-label">Mostrar filtro</span>
+    </label>
+
+</div>
+
+<form asp-action="Index" method="get">
+    
+    <div id="filtroLog" class="ocult">
+
+        <div class="row">
+
+        <div class="col-md-3">
+            <label>Data inicial</label><br />
+            <input class="form-control" type="date" name="dtInicial" id="dtInicial" asp-format="{0:yyyy-MM-dd}" value="@TempData["dtInicial"]" />
+        </div>
+
+        <div class="col-md-3">
+            <label>Data final</label><br />
+            <input class="form-control" type="date" name="dtFinal" id="dtFinal" asp-format="{0:yyyy-MM-dd}" value="@TempData["dtFinal"]" />
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="form-group">
+                <label>Operação</label><br />
+                <div class="btn-group">
+                        <input id="type" name="type" class="form-select multiselect dropdown-toggle" btn btn-default" style="width: 210px; height: 35px;" data-bs-toggle="dropdown" readonly="readonly" />
+                    <ul class="multiselect-container dropdown-menu">
+                        <li>
+                            <a href="javascript:void(0);">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="multiselect" onchange="changeOperacoes(this)" value="Create">
+                                    Inclusão
+                                </label>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="multiselect" onchange="changeOperacoes(this)" value="Update">
+                                    Atualização
+                                </label>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="multiselect" onchange="changeOperacoes(this)" value="Delete">
+                                    Exclusão
+                                </label>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+            <label>Chave do sistema</label><br />
+            <input type="text" class="form-control" name="chave" placeholder="Informe uma chave do sistema" value="@TempData["chave"]">
+        </div>
+                 
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Usuário</label><br />
+                <select asp-items="@ViewBag.listaUsuarios" class="form-control" name="usuario" value="@TempData["usuario"]">
+                    <option value="@TempData["idUsuario"]">@TempData["nomeUsuario"]</option>
+                    <option value="">--------Todos os usuários--------</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <label>Rotina</label><br />
+            <input type="text" class="form-control" name="rotina" placeholder="Rotina" value="@TempData["rotina"]">
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Pesquisar</label><br />
+                <input type="text" class="form-control" name="searchString" placeholder=" Pesquisar..." value="@TempData["searchString"]">
+            </div>
+        </div>
+        
+        <div class="col-md-3">            
+
+        </div>
+
+    </div>
+
+    <br />
+    
+    <div class="text-right">
+        <button type="submit" class="btn btn-primary">Pesquisar  <i class="fa fa-search"></i></button>
+        <a asp-controller="Auditoria" asp-action="Index" class="btn btn-secondary">Remover filtros <i class="fa fa-times" aria-hidden="true"></i></a>        
+    </div>
+
+    </div>
+    
+</form>
+
+<br />
+
+<div class="row">
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">Auditoria do sistema</div>
+            <div class="card-body">
+
+                <div id="dataTables_wrapper">
+
+                    <table width="100%" id="auditoria" class="table table-sm" style="padding: 10px;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>Data/Hora</label>
+                                    <i onclick="sortTable(0,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(0,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Rotina</label>
+                                    <i onclick="sortTable(1,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(1,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Operação</label>
+                                    <i onclick="sortTable(2,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(2,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Campo</label>
+                                    <i onclick="sortTable(3,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(3,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Valor antigo</label>
+                                    <i onclick="sortTable(4,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(4,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Valor novo</label>
+                                    <i onclick="sortTable(5,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(5,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Tabela</label>
+                                    <i onclick="sortTable(6,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(6,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Usuário</label>
+                                    <i onclick="sortTable(7,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(7,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th>
+                                    <label>Chave do sistema</label>
+                                    <i onclick="sortTable(8,'auditoria',false)" style="cursor: pointer" title="Ordenação decrescente" class="ik ik-arrow-down"></i>
+                                    <i onclick="sortTable(8,'auditoria',true)" style="cursor: pointer" title="Ordenação crescente" class="ik ik-arrow-up"></i>
+                                </th>
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int index = 0;
+                            }
+                            @foreach (var item in Model.Data)
+                            {
+                                var corTr = "#FFFFFF";
+                                switch (item.Type)
+                                {
+                                    case "Inclusão":
+                                        corTr = "#00BFFF";
+                                        break;
+                                    case "Atualização":
+                                        corTr = "#FFD700";
+                                        break;
+                                    case "Exclusão":
+                                        corTr = "#FA8072";
+                                        break;
+                                    default:
+                                        corTr = "#FFFFFF";
+                                        break;
+                                }
+
+                                <tr style="background-color: @corTr">
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.DateTime)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ControllerName)
+                                    </td>
+
+                                    <td>
+                                        @if (item.Type == "Inclusão")
+                                        {
+                                            <span class="badge bg-success" style="font-size: 8px; width: 60px">@Html.DisplayFor(modelItem => item.Type)</span>
+                                        }
+                                        else if (item.Type == "Atualização")
+                                        {
+                                            <span class="badge bg-warning text-dark" style="font-size: 8px; width: 60px">@Html.DisplayFor(modelItem => item.Type)</span>
+                                        }
+                                        else if (item.Type == "Exclusão")
+                                        {
+                                            <span class="badge bg-danger" style="font-size: 8px; width: 60px">@Html.DisplayFor(modelItem => item.Type)</span>
+                                        }
+                                        else
+                                        {
+                                            <font>@Html.DisplayFor(modelItem => item.Type)</font>
+                                        }
+                                    </td>
+                                    
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.AffectedColumns)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.OldValues)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.NewValues)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.TableName)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.AuthenticatedUser)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.PrimaryKey)
+                                    </td>
+
+                                    <td style="text-align: right;">
+
+                                        <button class="btn btn-dark"
+                                            title="Ver detalhes"
+                                                onclick="window.location='@Url.Action("Details", "Auditoria",
+                                            new { id = @item.Id })'">
+                                            <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                        </button>
+                                        
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        </tbody>
+                    </table>
+                    <div class="pagination-button">
+                        <partial name="_PaginationPartial" view-data="ViewData" model="Model" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/js/auditoria.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            $('table tr').each(function () {
+                var valor = parseInt($(this).find('td:nth-child(3)').html());
+                console.log(valor);
+                if (valor == 'Inclusão')
+                    $(this).addClass('Inclusao');
+            });
+
+        });
+    </script>
+}

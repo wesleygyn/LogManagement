@@ -1,0 +1,186 @@
+﻿@model LogManagement.Models.ViewModels.LoggedUserDataViewModel
+
+@{
+    string googleAPIKey = "AIzaSyDMBNnGoeeD4G0bj5s80hfKGMg1c0mM0zc";
+    ViewData["Title"] = "Início";
+}
+
+<div class="text-center">
+    <font style="font-size: 30px;" class="text-center">Informações do Usuário</font>
+</div>
+
+<p>
+    <button onclick="getLocation()">Get My Location</button>
+</p>
+
+<div class="row pt-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">Informações do Usuário</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="UserID" class="control-label"></label>
+                            <input asp-for="UserID" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="UserName" class="control-label"></label>
+                            <input asp-for="UserName" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="IpRemote" class="control-label"></label>
+                            <input asp-for="IpRemote" class="form-control" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="IPv4Local" class="control-label"></label>
+                            <input asp-for="IPv4Local" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="IPv6Local" class="control-label"></label>
+                            <input asp-for="IPv6Local" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="MacAddress" class="control-label"></label>
+                            <input asp-for="MacAddress" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="DeviceName" class="control-label"></label>
+                            <input asp-for="DeviceName" class="form-control" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Country" class="control-label"></label>
+                            <input asp-for="Country" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="RegionName" class="control-label"></label>
+                            <input asp-for="RegionName" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="City" class="control-label"></label>
+                            <input asp-for="City" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Zip" class="control-label"></label>
+                            <input asp-for="Zip" class="form-control" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Timezone" class="control-label"></label>
+                            <input asp-for="Timezone" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lat" class="control-label"></label>
+                            <input asp-for="Lat" class="form-control" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Lon" class="control-label"></label>
+                            <input asp-for="Lon" class="form-control" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row p-3 pt-4">
+                    <div id="map" style="height: 500px; width: 100%;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=@(googleAPIKey)&callback=initMap" async defer></script>
+
+    <script>
+        function initMap() {
+
+            var map_parameters = { center: { lat: @Model.Lat, lng: @Model.Lon }, zoom: 8 };
+            var map = new google.maps.Map(document.getElementById('map'), map_parameters);
+
+            var flag = 'http://maps.google.com/mapfiles/ms/icons/purple-dot.png';
+
+            var position1 = {
+                position: { lat: @Model.Lat, lng: @Model.Lon },
+                map: map, icon: flag, title: "Minha Localização"
+            };
+
+            var marker1 = new google.maps.Marker(position1);
+
+            function marker_clicked() {
+                info.setContent(this.getTitle());
+                info.open(map, this);
+            }
+
+            var info = new google.maps.InfoWindow();
+            marker1.addListener('click', marker_clicked);
+        }
+    </script>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function showPosition(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            alert("Latitude: " + latitude + "\nLongitude: " + longitude);
+        }
+    </script>
+
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,158 @@
+﻿@model LogManagement.Models.Audit
+
+@{
+    ViewData["Title"] = "Detalhes da auditoria";
+}
+
+<link href="~/lib/content/css/auditoria.css" rel="stylesheet" />
+
+<div class="text-right">
+    <div class="form-group">
+        <a asp-controller="Auditoria" asp-action="Index" class="btn btn-primary"><i class="ik ik-arrow-left"></i>Voltar</a>
+    </div>
+</div>
+
+<div class="row pt-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">Detalhes da auditoria</div>
+            <div class="card-body">
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label asp-for="Id" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.Id)</font>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label asp-for="AuthenticatedUser" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.AuthenticatedUser)</font>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="Type" class="control-label" style="font-weight: bold"></label><br />
+                            @if (Model.Type == "Create")
+                            {
+                                <font class="text-create">@Html.DisplayFor(model => model.Type)</font>
+                            }
+                            else if (Model.Type == "Update")
+                            {
+                                <font class="text-update">@Html.DisplayFor(model => model.Type)</font>
+                            }
+                            else if (Model.Type == "Delete")
+                            {
+                                <font class="text-delete">@Html.DisplayFor(model => model.Type)</font>
+                            }
+                            else
+                            {
+                                <font>@Html.DisplayFor(model => model.Type)</font>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="ControllerName" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.ControllerName)</font>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="TableName" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.TableName)</font>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="DateTime" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.DateTime)</font>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="OldValues" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.OldValues)</font>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="NewValues" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.NewValues)</font>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="AffectedColumns" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.AffectedColumns)</font>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label asp-for="PrimaryKey" class="control-label" style="font-weight: bold"></label><br />
+                            <font>@Html.DisplayFor(model => model.PrimaryKey)</font>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                    </div>
+
+                    <div class="col-md-2">
+                    </div>
+
+                </div>
+
+                <hr>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
